@@ -40,20 +40,14 @@ HASH=$(sha256sum ./build/out/data.tar.gz | awk '{print $1}')
 
 cp ./build/out/data.tar.gz ./build/data/${HASH}.tgz
 
-BIN_SUFFIX="-${ARCH}"
-if [ ${ARCH} = amd64 ]; then
-    BIN_SUFFIX=""
-elif [ ${ARCH} = arm ]; then
-    BIN_SUFFIX="-armhf"
-fi
+BIN_SUFFIX=""
 
 CMD_NAME=dist/artifacts/k3s${BIN_SUFFIX}
 
-go generate
+CGO_ENABLED=0 GOARCH= go generate -x
 LDFLAGS="
     -X github.com/rancher/k3s/pkg/version.Version=$VERSION
     -X github.com/rancher/k3s/pkg/version.GitCommit=${COMMIT:0:8}
-    -w -s
 "
 STATIC="-extldflags '-static'"
 if [ "$DQLITE" = "true" ]; then
